@@ -1,0 +1,1746 @@
+config:
+  agent:
+    mode: explicit
+    name: websearch
+  tools:
+    best_search_results:
+      host: URL
+      model: llama3.1:8b
+      system_message:
+        content: 'You are not an AI assistant that responds to a user. You are an
+          AI model trained to select the best search result out of a list of ten results.
+          The best search result is the link an expert human search engine user would
+          click first to find the data to respond to a USER_PROMPT after searching
+          DuckDuckGo for the SEARCH_QUERY. \nAll user messages you receive in this
+          conversation will have the format of: \n    SEARCH_RESULTS: [{},{},{}] \n
+          USER_PROMPT: \"this will be an actual prompt to a web search enabled AI
+          assistant\" \n    SEARCH QUERY: \"search query ran to get the above 10 links\"
+          \n\n You must select the index from the 0 indexed SEARCH_RESULTS list and
+          only respond with the index of the best search result to check for the data
+          the AI assistant needs to respond. That means your responses to this conversation
+          should always be 1 token, being an integer between 0-9."
+
+          '
+        role: system
+    contains_data_needed:
+      host: URL
+      model: llama3.1:8b
+      system_message:
+        content: 'You are not an AI assistant that response to a user. You are an
+          AI model designed to analyze data scraped from a web page to assistant actual
+          AI assistant in responding correctly with up to date information. Consider
+          the USER_PROMPT that was sent to the actual AI assistant & analyze the web
+          PAGE_TEXT to see if it does contain the data needed to construct an intelligent,
+          correct response. This web PAGE_TEXT was retrieved from a search engine
+          using the SEARCH_QUERY that is also attached to user messages in this  conversation.
+          All user messages in this conversation will have the format of: \n    PAGE_TEXT:
+          \"entire page text from the best search result based on the search snippet.\"
+          \n    USER_PROMPT: \"the prompt sent to an actual web search enabled AI
+          assistant.\" \n SEARCH_QUERY: \"the search query that was used to find data
+          determined necessary for the assistant to respond correctly and usefully.\"
+          \n You must determine whether the PAGE_TEXT actually contains reliable and
+          necessary data for the AI assistant to respond. You only have two possible
+          responses to user messages in this conversationL \"True\" or \"False\".
+          You never generate more than one token and it is always either \"True\"
+          or \"false\" with True indicating that page text does indeed contain the
+          reliable data for the AI assistant to use as context to respond. Respond
+          \"False\" if the PAGE_TEXT is not useful to answering the USER_PROMPT.
+
+          '
+        role: system
+    decide_to_search:
+      host: URL
+      model: llama3.1:8b
+      system_message:
+        content: '# Role
+
+          - You are a robot that only outputs one word: either "True" or "False".
+
+
+          # Instructions
+
+          - Silently answer each question below for the user prompt.
+
+          - If ANY answer is YES, you will output "True".
+
+          - If ALL answers are NO, you will output "False".
+
+
+          Does the answer require...
+
+          1. information past your training cutoff date (December 2023)?
+
+          2. knowledge of current events?
+
+          3. data that may have changed since December 2023?
+
+          4. information that is not a part of your training data?
+
+          5. information that is a small part of your training data?
+
+
+          # Examples
+
+
+          Example question: What is the weather like this evening?
+
+          Example answer: True
+
+
+          Example question: How many champions are in league of legends
+
+          Example answer: True
+
+
+          Example question: Biggest zero-day exploits of the 2010s
+
+          Example answer: False
+
+
+          Example question: How to write a socket in rust
+
+          Example answer: False
+
+          '
+        role: system
+    generate_query:
+      host: URL
+      model: llama3.1:8b
+      system_message:
+        content: 'You are not an AI assistant that response to a user. You are an
+          AI web search query generator model. You will be given a prompt to an AI
+          assistant with web search capabilities. IF you are being used, an AI has
+          determined this prompt to the actual AI assistant requires web search for
+          more recent data. You must determine what the data is the assistant needs
+          from search and generate the best possible DuckDuckGo query to find that
+          data. Do not respond with anything but a query that an expert human search
+          engine user would type into DuckDucoGo to find the needed data. Keep your
+          queries simple, without any search engine code. Just type a query likely
+          to retrieve the data we need.
+
+          '
+        role: system
+  workers:
+    scrape_webpage:
+      trafilatura_download_timeout: '5'
+      trafilatura_extraction_timeout: '10'
+    searxng_search:
+      num_search_results: 10
+      search_headers:
+        User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101
+          Firefox/146.0
+      url: URL
+epochs:
+- - category: clear_search
+    length: 8
+    query: ethereum current price usd
+    query_length: 4
+    question: What's the current price of Ethereum in USD?
+  - category: clear_search
+    length: 4
+    query: Current weather in Tokyo
+    query_length: 4
+    question: Weather today in Tokyo?
+  - category: clear_search
+    length: 6
+    query: Last nights sports scores
+    query_length: 4
+    question: Who won the game last night?
+  - category: clear_search
+    length: 5
+    query: nvda stock current price
+    query_length: 4
+    question: NVDA stock price right now
+  - category: clear_search
+    length: 5
+    query: I-95 current traffic conditions
+    query_length: 4
+    question: Is the I-95 open currently?
+  - category: clear_search
+    length: 5
+    query: London news today
+    query_length: 3
+    question: Latest breaking news in London
+  - category: clear_search
+    length: 13
+    query: current 30 year fixed mortgage rates in Florida
+    query_length: 8
+    question: What is the current mortgage rate for a 30-year fixed loan in Florida?
+  - category: clear_search
+    length: 14
+    query: pharmacy near me open late night hours
+    query_length: 7
+    question: Find me the opening hours for the closest pharmacy that is still open
+      tonight.
+  - category: clear_search
+    length: 14
+    query: showtimes Gladiator II nearby
+    query_length: 4
+    question: What are the most recent movie showtimes for 'Gladiator II' at theaters
+      near me?
+  - category: clear_search
+    length: 15
+    query: Southern California wildfire evacuation updates today
+    query_length: 6
+    question: I need to know if there are any active wildfire evacuations in Southern
+      California today.
+  - category: clear_search
+    length: 15
+    query: UK 2023 budget policy changes
+    query_length: 5
+    question: Tell me about the specific policy changes announced in the most recent
+      UK budget statement.
+  - category: clear_search
+    length: 15
+    query: top 5 trending topics on x today us
+    query_length: 8
+    question: Please provide a list of the top 5 trending topics on X in the US.
+  - category: clear_search
+    length: 14
+    query: aust vs ind test cricket live score
+    query_length: 7
+    question: What is the current score of the ongoing Test match between Australia
+      and India?
+  - category: clear_search
+    length: 16
+    query: salmon food recall fda recent
+    query_length: 5
+    question: Are there any food recalls issued by the FDA in the last 48 hours for
+      salmon?
+  - category: clear_search
+    length: 17
+    query: New York to Paris flight prices this Friday to Sunday return
+    query_length: 11
+    question: Show me the cheapest round-trip flights from New York to Paris departing
+      this Friday and returning Sunday.
+  - category: clear_search
+    length: 16
+    query: James Webb Space Telescope latest galaxy discovery 2023
+    query_length: 8
+    question: I'm looking for the most recent updates on the James Webb Space Telescope's
+      latest galaxy discovery.
+  - category: clear_search
+    length: 17
+    query: Starbucks CEO appointment date
+    query_length: 4
+    question: Can you find the current CEO of Starbucks and when they were officially
+      appointed to the role?
+  - category: clear_search
+    length: 16
+    query: Costco gas prices San Diego vs California average
+    query_length: 8
+    question: What are the current gas prices at Costco in San Diego compared to the
+      state average?
+  - category: clear_search
+    length: 14
+    query: federal reserve latest interest rate decision
+    query_length: 6
+    question: What did the Federal Reserve decide regarding interest rates during
+      their meeting this afternoon?
+  - category: clear_search
+    length: 17
+    query: Northern Lights visibility forecast northern Minnesota tonight
+    query_length: 7
+    question: Any idea if the Northern Lights will be visible from northern Minnesota
+      tonight based on solar activity?
+  - category: clear_search
+    length: 17
+    query: new iPhone 2023 review summaries
+    query_length: 5
+    question: Looking for a summary of the critical reviews for the new iPhone model
+      released earlier this week.
+  - category: clear_search
+    length: 16
+    query: Massachusetts General Hospital emergency room wait times today
+    query_length: 8
+    question: What is the current wait time for the emergency room at Massachusetts
+      General Hospital right now?
+  - category: clear_search
+    length: 16
+    query: Nobel Prize in Physics 2024 winners OR Nobel Physics Prize 2024 recipients
+    query_length: 12
+    question: Please list the winners of the 2024 Nobel Prize in Physics and their
+      specific research contributions.
+  - category: clear_search
+    length: 18
+    query: Japanese Yen to Euro current exchange rate today
+    query_length: 8
+    question: I require information on the current exchange rate between the Japanese
+      Yen and the Euro as of today.
+  - category: clear_search
+    length: 18
+    query: Taylor Swift European tour dates 2023 ticket availability
+    query_length: 8
+    question: What are the upcoming tour dates for Taylor Swift in Europe and are
+      tickets still available for purchase?
+  - category: moderate_search
+    length: 6
+    query: best laptops for video editing 2024 reviews
+    query_length: 7
+    question: Best laptop for video editing 2024?
+  - category: moderate_search
+    length: 7
+    query: AI job growth 2023 statistics
+    query_length: 5
+    question: How is the job market for AI?
+  - category: moderate_search
+    length: 5
+    query: Space missions 2023
+    query_length: 3
+    question: Upcoming space missions this year
+  - category: moderate_search
+    length: 7
+    query: tax law changes 2023
+    query_length: 4
+    question: What's up with the new tax laws?
+  - category: moderate_search
+    length: 7
+    query: coffee and cancer prevention studies
+    query_length: 5
+    question: Is it true that coffee prevents cancer?
+  - category: moderate_search
+    length: 6
+    query: Seattle top rated sushi restaurants 2023
+    query_length: 6
+    question: Top rated sushi restaurants in Seattle?
+  - category: moderate_search
+    length: 16
+    query: solid state battery EV technology advancements 2023
+    query_length: 7
+    question: Tell me about the latest breakthroughs in solid-state battery technology
+      for electric vehicles from this year.
+  - category: moderate_search
+    length: 17
+    query: samsung galaxy s vs google pixel camera comparison
+    query_length: 8
+    question: Compare the camera specs of the latest Samsung Galaxy S series versus
+      the newest Google Pixel phone.
+  - category: moderate_search
+    length: 16
+    query: small cap etf performance 6 month
+    query_length: 6
+    question: What are the best-performing small-cap ETFs over the last six months
+      according to recent financial analysis?
+  - category: moderate_search
+    length: 16
+    query: fonio recipes high protein vegetarian
+    query_length: 5
+    question: I need to find a high-protein vegetarian meal plan that incorporates
+      recently trending superfoods like fonio.
+  - category: moderate_search
+    length: 17
+    query: Recent top rated wireless earbuds for running
+    query_length: 7
+    question: Find me the most highly recommended wireless earbuds for running that
+      were released in the last year.
+  - category: moderate_search
+    length: 17
+    query: 'US citizen travel requirements Vietnam visa
+
+
+      This query should return up-to-date information on any necessary visas, as well
+      as other travel restrictions that may be in place.'
+    query_length: 27
+    question: What are the current travel restrictions or visa requirements for US
+      citizens visiting Vietnam for a vacation?
+  - category: moderate_search
+    length: 17
+    query: newest marvel movie plot summary and reviews
+    query_length: 7
+    question: Please provide a summary of the major plot points and critical reception
+      for the newest Marvel movie.
+  - category: moderate_search
+    length: 18
+    query: GLP-1 agonists polycystic ovary syndrome recent studies efficacy
+    query_length: 8
+    question: I am looking for the most recent clinical study results regarding the
+      effectiveness of GLP-1 drugs for PCOS.
+  - category: moderate_search
+    length: 17
+    query: Europe 2024 heatwave temperature comparison to 2003
+    query_length: 7
+    question: How does the current 2024 heatwave in Europe compare to the record temperatures
+      seen back in 2003?
+  - category: edge_case
+    length: 3
+    query: Paris capital France
+    query_length: 3
+    question: Capital of France?
+  - category: edge_case
+    length: 6
+    query: number of planets in our solar system
+    query_length: 7
+    question: How many planets in solar system?
+  - category: edge_case
+    length: 5
+    query: circle area formula
+    query_length: 3
+    question: Formula for area of circle
+  - category: edge_case
+    length: 6
+    query: Harper Lee author To Kill a Mockingbird
+    query_length: 7
+    question: Who wrote 'To Kill a Mockingbird'?
+  - category: edge_case
+    length: 7
+    query: water boiling point temperature
+    query_length: 4
+    question: What is the boiling point of water?
+  - category: edge_case
+    length: 16
+    query: United Nations official mission statement 2024
+    query_length: 6
+    question: I need the official mission statement of the United Nations to see if
+      it has changed.
+  - category: edge_case
+    length: 16
+    query: Current number of African Union member states 2024
+    query_length: 8
+    question: Please confirm the current total number of member states in the African
+      Union for my report.
+  - category: edge_case
+    length: 17
+    query: burj khalifa current height with antennas
+    query_length: 6
+    question: Can you verify the exact height of the Burj Khalifa including any recent
+      antenna modifications or updates?
+  - category: edge_case
+    length: 17
+    query: Tokyo Japan population latest census figures
+    query_length: 6
+    question: What is the current population of Tokyo, Japan, according to the most
+      recently published government census data?
+  - category: edge_case
+    length: 18
+    query: Oxford English Dictionary definition generative AI 2024
+    query_length: 7
+    question: I am looking for the current standard definition of 'Generative AI'
+      as used by the Oxford English Dictionary.
+- - category: clear_search
+    length: 8
+    query: Ethereum price USD today
+    query_length: 4
+    question: What's the current price of Ethereum in USD?
+  - category: clear_search
+    length: 4
+    query: Tokyo weather forecast now
+    query_length: 4
+    question: Weather today in Tokyo?
+  - category: clear_search
+    length: 6
+    query: Sports scores from last night's games
+    query_length: 6
+    question: Who won the game last night?
+  - category: clear_search
+    length: 5
+    query: nvda stock current price
+    query_length: 4
+    question: NVDA stock price right now
+  - category: clear_search
+    length: 5
+    query: i-95 current road conditions
+    query_length: 4
+    question: Is the I-95 open currently?
+  - category: clear_search
+    length: 5
+    query: London news today
+    query_length: 3
+    question: Latest breaking news in London
+  - category: clear_search
+    length: 13
+    query: Florida 30 year fixed mortgage rates today
+    query_length: 7
+    question: What is the current mortgage rate for a 30-year fixed loan in Florida?
+  - category: clear_search
+    length: 14
+    query: pharmacy near me current business hours tonight
+    query_length: 7
+    question: Find me the opening hours for the closest pharmacy that is still open
+      tonight.
+  - category: clear_search
+    length: 14
+    query: showtimes Gladiator II near my location
+    query_length: 6
+    question: What are the most recent movie showtimes for 'Gladiator II' at theaters
+      near me?
+  - category: clear_search
+    length: 15
+    query: southern california active wildfire evacuations
+    query_length: 5
+    question: I need to know if there are any active wildfire evacuations in Southern
+      California today.
+  - category: clear_search
+    length: 15
+    query: uk latest budget 2023 policy changes
+    query_length: 6
+    question: Tell me about the specific policy changes announced in the most recent
+      UK budget statement.
+  - category: clear_search
+    length: 15
+    query: Trending topics X in the US
+    query_length: 6
+    question: Please provide a list of the top 5 trending topics on X in the US.
+  - category: clear_search
+    length: 14
+    query: australia vs india test cricket current score
+    query_length: 7
+    question: What is the current score of the ongoing Test match between Australia
+      and India?
+  - category: clear_search
+    length: 16
+    query: FDA salmon recall recent 48 hours
+    query_length: 6
+    question: Are there any food recalls issued by the FDA in the last 48 hours for
+      salmon?
+  - category: clear_search
+    length: 17
+    query: New York to Paris flights this Friday return Sunday cheapest
+    query_length: 10
+    question: Show me the cheapest round-trip flights from New York to Paris departing
+      this Friday and returning Sunday.
+  - category: clear_search
+    length: 16
+    query: james webb space telescope latest galaxy discovery news
+    query_length: 8
+    question: I'm looking for the most recent updates on the James Webb Space Telescope's
+      latest galaxy discovery.
+  - category: clear_search
+    length: 17
+    query: Starbucks CEO appointment date
+    query_length: 4
+    question: Can you find the current CEO of Starbucks and when they were officially
+      appointed to the role?
+  - category: clear_search
+    length: 16
+    query: San Diego Costco gas prices vs California state average
+    query_length: 9
+    question: What are the current gas prices at Costco in San Diego compared to the
+      state average?
+  - category: clear_search
+    length: 14
+    query: Federal Reserve interest rate decision today
+    query_length: 6
+    question: What did the Federal Reserve decide regarding interest rates during
+      their meeting this afternoon?
+  - category: clear_search
+    length: 17
+    query: Northern Lights forecast northern Minnesota solar activity tonight
+    query_length: 8
+    question: Any idea if the Northern Lights will be visible from northern Minnesota
+      tonight based on solar activity?
+  - category: clear_search
+    length: 17
+    query: new iPhone model release 2024 critical reviews
+    query_length: 7
+    question: Looking for a summary of the critical reviews for the new iPhone model
+      released earlier this week.
+  - category: clear_search
+    length: 16
+    query: Massachusetts General Hospital emergency room wait time now
+    query_length: 8
+    question: What is the current wait time for the emergency room at Massachusetts
+      General Hospital right now?
+  - category: clear_search
+    length: 16
+    query: 2024 Nobel Prize in Physics winners and their research
+    query_length: 9
+    question: Please list the winners of the 2024 Nobel Prize in Physics and their
+      specific research contributions.
+  - category: clear_search
+    length: 18
+    query: Current JPY EUR exchange rate
+    query_length: 5
+    question: I require information on the current exchange rate between the Japanese
+      Yen and the Euro as of today.
+  - category: clear_search
+    length: 18
+    query: taylor swift europe tour dates 2023 ticket availability
+    query_length: 8
+    question: What are the upcoming tour dates for Taylor Swift in Europe and are
+      tickets still available for purchase?
+  - category: moderate_search
+    length: 6
+    query: best laptops for video editing 2024 review
+    query_length: 7
+    question: Best laptop for video editing 2024?
+  - category: moderate_search
+    length: 7
+    query: AI job market growth statistics 2023
+    query_length: 6
+    question: How is the job market for AI?
+  - category: moderate_search
+    length: 5
+    query: upcoming space missions 2023
+    query_length: 4
+    question: Upcoming space missions this year
+  - category: moderate_search
+    length: 7
+    query: new tax law updates 2023
+    query_length: 5
+    question: What's up with the new tax laws?
+  - category: moderate_search
+    length: 7
+    query: coffee cancer prevention studies
+    query_length: 4
+    question: Is it true that coffee prevents cancer?
+  - category: moderate_search
+    length: 6
+    query: sushi restaurants seattle reviews
+    query_length: 4
+    question: Top rated sushi restaurants in Seattle?
+  - category: moderate_search
+    length: 16
+    query: solid state battery electric vehicle breakthroughs 2023
+    query_length: 7
+    question: Tell me about the latest breakthroughs in solid-state battery technology
+      for electric vehicles from this year.
+  - category: moderate_search
+    length: 17
+    query: samsung galaxy s series camera specs vs google pixel 6 camera specs
+    query_length: 12
+    question: Compare the camera specs of the latest Samsung Galaxy S series versus
+      the newest Google Pixel phone.
+  - category: moderate_search
+    length: 16
+    query: small-cap ETF performance last 6 months
+    query_length: 6
+    question: What are the best-performing small-cap ETFs over the last six months
+      according to recent financial analysis?
+  - category: moderate_search
+    length: 16
+    query: Fonio recipes high protein vegetarian
+    query_length: 5
+    question: I need to find a high-protein vegetarian meal plan that incorporates
+      recently trending superfoods like fonio.
+  - category: moderate_search
+    length: 17
+    query: 'best wireless earbuds for running 2023
+
+
+      (Note: I''ve assumed 2023 as the current year, but if you want a more general
+      query, you can simply use best wireless earbuds for running)'
+    query_length: 31
+    question: Find me the most highly recommended wireless earbuds for running that
+      were released in the last year.
+  - category: moderate_search
+    length: 17
+    query: US citizen travel restrictions Vietnam visa requirements 2023
+    query_length: 8
+    question: What are the current travel restrictions or visa requirements for US
+      citizens visiting Vietnam for a vacation?
+  - category: moderate_search
+    length: 17
+    query: Newest Marvel movie plot summary and reviews
+    query_length: 7
+    question: Please provide a summary of the major plot points and critical reception
+      for the newest Marvel movie.
+  - category: moderate_search
+    length: 18
+    query: GLP-1 receptor agonists PCOS efficacy studies 2023
+    query_length: 7
+    question: I am looking for the most recent clinical study results regarding the
+      effectiveness of GLP-1 drugs for PCOS.
+  - category: moderate_search
+    length: 17
+    query: European heatwaves comparison 2024 vs 2003 temperature records
+    query_length: 8
+    question: How does the current 2024 heatwave in Europe compare to the record temperatures
+      seen back in 2003?
+  - category: edge_case
+    length: 3
+    query: Paris capital France
+    query_length: 3
+    question: Capital of France?
+  - category: edge_case
+    length: 6
+    query: number of planets in our solar system
+    query_length: 7
+    question: How many planets in solar system?
+  - category: edge_case
+    length: 5
+    query: Area formula circle
+    query_length: 3
+    question: Formula for area of circle
+  - category: edge_case
+    length: 6
+    query: Harper Lee author To Kill a Mockingbird
+    query_length: 7
+    question: Who wrote 'To Kill a Mockingbird'?
+  - category: edge_case
+    length: 7
+    query: water boiling point temperature
+    query_length: 4
+    question: What is the boiling point of water?
+  - category: edge_case
+    length: 16
+    query: United Nations official mission statement change over time
+    query_length: 8
+    question: I need the official mission statement of the United Nations to see if
+      it has changed.
+  - category: edge_case
+    length: 16
+    query: african union member states 2024
+    query_length: 5
+    question: Please confirm the current total number of member states in the African
+      Union for my report.
+  - category: edge_case
+    length: 17
+    query: burj khalifa current height
+    query_length: 4
+    question: Can you verify the exact height of the Burj Khalifa including any recent
+      antenna modifications or updates?
+  - category: edge_case
+    length: 17
+    query: Tokyo Japan population latest census
+    query_length: 5
+    question: What is the current population of Tokyo, Japan, according to the most
+      recently published government census data?
+  - category: edge_case
+    length: 18
+    query: Oxford English Dictionary definition generative AI
+    query_length: 6
+    question: I am looking for the current standard definition of 'Generative AI'
+      as used by the Oxford English Dictionary.
+- - category: clear_search
+    length: 8
+    query: ethereum price usd
+    query_length: 3
+    question: What's the current price of Ethereum in USD?
+  - category: clear_search
+    length: 4
+    query: Tokyo weather forecast today
+    query_length: 4
+    question: Weather today in Tokyo?
+  - category: clear_search
+    length: 6
+    query: yesterday's sports scores
+    query_length: 3
+    question: Who won the game last night?
+  - category: clear_search
+    length: 5
+    query: Current NVDA stock price
+    query_length: 4
+    question: NVDA stock price right now
+  - category: clear_search
+    length: 5
+    query: i-95 current road conditions
+    query_length: 4
+    question: Is the I-95 open currently?
+  - category: clear_search
+    length: 5
+    query: London latest news today
+    query_length: 4
+    question: Latest breaking news in London
+  - category: clear_search
+    length: 13
+    query: Current 30 year fixed mortgage rates Florida
+    query_length: 7
+    question: What is the current mortgage rate for a 30-year fixed loan in Florida?
+  - category: clear_search
+    length: 14
+    query: pharmacy near me open tonight
+    query_length: 5
+    question: Find me the opening hours for the closest pharmacy that is still open
+      tonight.
+  - category: clear_search
+    length: 14
+    query: gladiator 2 showtimes near my location
+    query_length: 6
+    question: What are the most recent movie showtimes for 'Gladiator II' at theaters
+      near me?
+  - category: clear_search
+    length: 15
+    query: Southern California active wildfire evacuations
+    query_length: 5
+    question: I need to know if there are any active wildfire evacuations in Southern
+      California today.
+  - category: clear_search
+    length: 15
+    query: UK latest budget 2023 announcements policies
+    query_length: 6
+    question: Tell me about the specific policy changes announced in the most recent
+      UK budget statement.
+  - category: clear_search
+    length: 15
+    query: top trending topics on TikTok in the US this month
+    query_length: 10
+    question: Please provide a list of the top 5 trending topics on X in the US.
+  - category: clear_search
+    length: 14
+    query: australia vs india test match current score
+    query_length: 7
+    question: What is the current score of the ongoing Test match between Australia
+      and India?
+  - category: clear_search
+    length: 16
+    query: FDA salmon recall recent 48 hours
+    query_length: 6
+    question: Are there any food recalls issued by the FDA in the last 48 hours for
+      salmon?
+  - category: clear_search
+    length: 17
+    query: flights from NYC to Paris this Friday return Sunday cheap
+    query_length: 10
+    question: Show me the cheapest round-trip flights from New York to Paris departing
+      this Friday and returning Sunday.
+  - category: clear_search
+    length: 16
+    query: James Webb Space Telescope latest galaxy discovery news
+    query_length: 8
+    question: I'm looking for the most recent updates on the James Webb Space Telescope's
+      latest galaxy discovery.
+  - category: clear_search
+    length: 17
+    query: Starbucks current CEO appointment date
+    query_length: 5
+    question: Can you find the current CEO of Starbucks and when they were officially
+      appointed to the role?
+  - category: clear_search
+    length: 16
+    query: Costco gas prices San Diego vs California average
+    query_length: 8
+    question: What are the current gas prices at Costco in San Diego compared to the
+      state average?
+  - category: clear_search
+    length: 14
+    query: federal reserve interest rate decision
+    query_length: 5
+    question: What did the Federal Reserve decide regarding interest rates during
+      their meeting this afternoon?
+  - category: clear_search
+    length: 17
+    query: Northern Lights forecast northern Minnesota solar activity tonight
+    query_length: 8
+    question: Any idea if the Northern Lights will be visible from northern Minnesota
+      tonight based on solar activity?
+  - category: clear_search
+    length: 17
+    query: new iPhone model reviews criticism
+    query_length: 5
+    question: Looking for a summary of the critical reviews for the new iPhone model
+      released earlier this week.
+  - category: clear_search
+    length: 16
+    query: mass general hospital emergency room wait time now
+    query_length: 8
+    question: What is the current wait time for the emergency room at Massachusetts
+      General Hospital right now?
+  - category: clear_search
+    length: 16
+    query: 2024 Nobel Prize in Physics winners research contributions
+    query_length: 8
+    question: Please list the winners of the 2024 Nobel Prize in Physics and their
+      specific research contributions.
+  - category: clear_search
+    length: 18
+    query: Current yen euro exchange rate
+    query_length: 5
+    question: I require information on the current exchange rate between the Japanese
+      Yen and the Euro as of today.
+  - category: clear_search
+    length: 18
+    query: taylor swift europe tour 2023 ticket availability
+    query_length: 7
+    question: What are the upcoming tour dates for Taylor Swift in Europe and are
+      tickets still available for purchase?
+  - category: moderate_search
+    length: 6
+    query: Laptop best suited for video editing 2024
+    query_length: 7
+    question: Best laptop for video editing 2024?
+  - category: moderate_search
+    length: 7
+    query: AI job market trends 2023
+    query_length: 5
+    question: How is the job market for AI?
+  - category: moderate_search
+    length: 5
+    query: upcoming space missions 2023
+    query_length: 4
+    question: Upcoming space missions this year
+  - category: moderate_search
+    length: 7
+    query: tax law changes 2023
+    query_length: 4
+    question: What's up with the new tax laws?
+  - category: moderate_search
+    length: 7
+    query: coffee and cancer prevention
+    query_length: 4
+    question: Is it true that coffee prevents cancer?
+  - category: moderate_search
+    length: 6
+    query: sushi restaurants seattle top rated
+    query_length: 5
+    question: Top rated sushi restaurants in Seattle?
+  - category: moderate_search
+    length: 16
+    query: solid state battery ev advancements 2023
+    query_length: 6
+    question: Tell me about the latest breakthroughs in solid-state battery technology
+      for electric vehicles from this year.
+  - category: moderate_search
+    length: 17
+    query: samsung galaxy s series camera specs vs google pixel phone
+    query_length: 10
+    question: Compare the camera specs of the latest Samsung Galaxy S series versus
+      the newest Google Pixel phone.
+  - category: moderate_search
+    length: 16
+    query: small-cap ETF performance last 6 months
+    query_length: 6
+    question: What are the best-performing small-cap ETFs over the last six months
+      according to recent financial analysis?
+  - category: moderate_search
+    length: 16
+    query: fonio superfood vegetarian meal plans high protein
+    query_length: 7
+    question: I need to find a high-protein vegetarian meal plan that incorporates
+      recently trending superfoods like fonio.
+  - category: moderate_search
+    length: 17
+    query: 'Best wireless earbuds for running 2023 reviews
+
+
+      (Note: I''ve added reviews to the query to ensure we get information from recent
+      publications and comparisons, which are more likely to be up-to-date on the
+      latest releases.)'
+    query_length: 35
+    question: Find me the most highly recommended wireless earbuds for running that
+      were released in the last year.
+  - category: moderate_search
+    length: 17
+    query: 'US citizen travel restrictions Vietnam visa requirements 2023
+
+
+      (Note: I''ve included the year 2023 to ensure that the search results are up-to-date)'
+    query_length: 22
+    question: What are the current travel restrictions or visa requirements for US
+      citizens visiting Vietnam for a vacation?
+  - category: moderate_search
+    length: 17
+    query: Newest Marvel movie plot summary and reviews
+    query_length: 7
+    question: Please provide a summary of the major plot points and critical reception
+      for the newest Marvel movie.
+  - category: moderate_search
+    length: 18
+    query: GLP-1 drugs PCOS clinical trials 2023
+    query_length: 6
+    question: I am looking for the most recent clinical study results regarding the
+      effectiveness of GLP-1 drugs for PCOS.
+  - category: moderate_search
+    length: 17
+    query: Europe heatwave comparison 2024 vs 2003 temperature records
+    query_length: 8
+    question: How does the current 2024 heatwave in Europe compare to the record temperatures
+      seen back in 2003?
+  - category: edge_case
+    length: 3
+    query: Paris capital France
+    query_length: 3
+    question: Capital of France?
+  - category: edge_case
+    length: 6
+    query: number of planets in our solar system
+    query_length: 7
+    question: How many planets in solar system?
+  - category: edge_case
+    length: 5
+    query: "\u03C0r^2"
+    query_length: 1
+    question: Formula for area of circle
+  - category: edge_case
+    length: 6
+    query: author of To Kill a Mockingbird
+    query_length: 6
+    question: Who wrote 'To Kill a Mockingbird'?
+  - category: edge_case
+    length: 7
+    query: water boiling point
+    query_length: 3
+    question: What is the boiling point of water?
+  - category: edge_case
+    length: 16
+    query: United Nations official mission statement 2023
+    query_length: 6
+    question: I need the official mission statement of the United Nations to see if
+      it has changed.
+  - category: edge_case
+    length: 16
+    query: African Union current member states
+    query_length: 5
+    question: Please confirm the current total number of member states in the African
+      Union for my report.
+  - category: edge_case
+    length: 17
+    query: Burj Khalifa current height with antenna
+    query_length: 6
+    question: Can you verify the exact height of the Burj Khalifa including any recent
+      antenna modifications or updates?
+  - category: edge_case
+    length: 17
+    query: Tokyo population latest census figures
+    query_length: 5
+    question: What is the current population of Tokyo, Japan, according to the most
+      recently published government census data?
+  - category: edge_case
+    length: 18
+    query: Oxford English Dictionary definition Generative AI
+    query_length: 6
+    question: I am looking for the current standard definition of 'Generative AI'
+      as used by the Oxford English Dictionary.
+- - category: clear_search
+    length: 8
+    query: ethereum usd price today
+    query_length: 4
+    question: What's the current price of Ethereum in USD?
+  - category: clear_search
+    length: 4
+    query: Tokyo weather forecast today
+    query_length: 4
+    question: Weather today in Tokyo?
+  - category: clear_search
+    length: 6
+    query: Recent sports scores
+    query_length: 3
+    question: Who won the game last night?
+  - category: clear_search
+    length: 5
+    query: current NVDA stock price
+    query_length: 4
+    question: NVDA stock price right now
+  - category: clear_search
+    length: 5
+    query: I-95 traffic update
+    query_length: 3
+    question: Is the I-95 open currently?
+  - category: clear_search
+    length: 5
+    query: London recent news
+    query_length: 3
+    question: Latest breaking news in London
+  - category: clear_search
+    length: 13
+    query: current 30 year fixed mortgage rates in Florida
+    query_length: 8
+    question: What is the current mortgage rate for a 30-year fixed loan in Florida?
+  - category: clear_search
+    length: 14
+    query: pharmacy near me open now late night hours
+    query_length: 8
+    question: Find me the opening hours for the closest pharmacy that is still open
+      tonight.
+  - category: clear_search
+    length: 14
+    query: movie showtimes Gladiator II near my location
+    query_length: 7
+    question: What are the most recent movie showtimes for 'Gladiator II' at theaters
+      near me?
+  - category: clear_search
+    length: 15
+    query: southern california active wildfire evacuations
+    query_length: 5
+    question: I need to know if there are any active wildfire evacuations in Southern
+      California today.
+  - category: clear_search
+    length: 15
+    query: UK latest budget policy changes 2023
+    query_length: 6
+    question: Tell me about the specific policy changes announced in the most recent
+      UK budget statement.
+  - category: clear_search
+    length: 15
+    query: "X trending topics US news \n\n(Note: The model assumes X is an entity\
+      \ that should be specified, but since it's not provided, the query is generated\
+      \ assuming X could refer to a website, topic, or other entity that is relevant\
+      \ to trending topics in the US.)"
+    query_length: 46
+    question: Please provide a list of the top 5 trending topics on X in the US.
+  - category: clear_search
+    length: 14
+    query: australia vs india test cricket live score
+    query_length: 7
+    question: What is the current score of the ongoing Test match between Australia
+      and India?
+  - category: clear_search
+    length: 16
+    query: FDA salmon recall recent 48 hours
+    query_length: 6
+    question: Are there any food recalls issued by the FDA in the last 48 hours for
+      salmon?
+  - category: clear_search
+    length: 17
+    query: New York to Paris flight prices this Friday to Sunday return
+    query_length: 11
+    question: Show me the cheapest round-trip flights from New York to Paris departing
+      this Friday and returning Sunday.
+  - category: clear_search
+    length: 16
+    query: james webb space telescope latest galaxy discovery 2023
+    query_length: 8
+    question: I'm looking for the most recent updates on the James Webb Space Telescope's
+      latest galaxy discovery.
+  - category: clear_search
+    length: 17
+    query: Starbucks current CEO appointment date
+    query_length: 5
+    question: Can you find the current CEO of Starbucks and when they were officially
+      appointed to the role?
+  - category: clear_search
+    length: 16
+    query: costco san diego gas prices vs california average
+    query_length: 8
+    question: What are the current gas prices at Costco in San Diego compared to the
+      state average?
+  - category: clear_search
+    length: 14
+    query: Fed interest rate decision March [current month]
+    query_length: 7
+    question: What did the Federal Reserve decide regarding interest rates during
+      their meeting this afternoon?
+  - category: clear_search
+    length: 17
+    query: solar activity northern minnesota northern lights visibility
+    query_length: 7
+    question: Any idea if the Northern Lights will be visible from northern Minnesota
+      tonight based on solar activity?
+  - category: clear_search
+    length: 17
+    query: new iPhone model reviews
+    query_length: 4
+    question: Looking for a summary of the critical reviews for the new iPhone model
+      released earlier this week.
+  - category: clear_search
+    length: 16
+    query: Massachusetts General Hospital emergency room wait times today
+    query_length: 8
+    question: What is the current wait time for the emergency room at Massachusetts
+      General Hospital right now?
+  - category: clear_search
+    length: 16
+    query: 2024 Nobel Prize in Physics winners research contributions
+    query_length: 8
+    question: Please list the winners of the 2024 Nobel Prize in Physics and their
+      specific research contributions.
+  - category: clear_search
+    length: 18
+    query: Japanese Yen to Euro current exchange rate
+    query_length: 7
+    question: I require information on the current exchange rate between the Japanese
+      Yen and the Euro as of today.
+  - category: clear_search
+    length: 18
+    query: Taylor Swift European tour dates 2023 ticket availability
+    query_length: 8
+    question: What are the upcoming tour dates for Taylor Swift in Europe and are
+      tickets still available for purchase?
+  - category: moderate_search
+    length: 6
+    query: best laptops for video editing 2024 reviews
+    query_length: 7
+    question: Best laptop for video editing 2024?
+  - category: moderate_search
+    length: 7
+    query: AI job market trends
+    query_length: 4
+    question: How is the job market for AI?
+  - category: moderate_search
+    length: 5
+    query: space mission schedules 2023
+    query_length: 4
+    question: Upcoming space missions this year
+  - category: moderate_search
+    length: 7
+    query: new tax laws 2023
+    query_length: 4
+    question: What's up with the new tax laws?
+  - category: moderate_search
+    length: 7
+    query: Coffee and cancer prevention studies
+    query_length: 5
+    question: Is it true that coffee prevents cancer?
+  - category: moderate_search
+    length: 6
+    query: sushi restaurants seattle top rated
+    query_length: 5
+    question: Top rated sushi restaurants in Seattle?
+  - category: moderate_search
+    length: 16
+    query: Solid-state battery EV breakthroughs 2023
+    query_length: 5
+    question: Tell me about the latest breakthroughs in solid-state battery technology
+      for electric vehicles from this year.
+  - category: moderate_search
+    length: 17
+    query: samsung galaxy s series camera specs vs google pixel phone
+    query_length: 10
+    question: Compare the camera specs of the latest Samsung Galaxy S series versus
+      the newest Google Pixel phone.
+  - category: moderate_search
+    length: 16
+    query: Small-cap ETF performance last 6 months
+    query_length: 6
+    question: What are the best-performing small-cap ETFs over the last six months
+      according to recent financial analysis?
+  - category: moderate_search
+    length: 16
+    query: fonio recipes high protein vegetarian superfood meal plans
+    query_length: 8
+    question: I need to find a high-protein vegetarian meal plan that incorporates
+      recently trending superfoods like fonio.
+  - category: moderate_search
+    length: 17
+    query: Best new wireless earbuds 2023 for running
+    query_length: 7
+    question: Find me the most highly recommended wireless earbuds for running that
+      were released in the last year.
+  - category: moderate_search
+    length: 17
+    query: "US citizen travel restrictions Vietnam visa requirements\n\nor \n\nCurrent\
+      \ travel requirements for US tourists in Vietnam"
+    query_length: 16
+    question: What are the current travel restrictions or visa requirements for US
+      citizens visiting Vietnam for a vacation?
+  - category: moderate_search
+    length: 17
+    query: Marvel latest film plot summary and reviews
+    query_length: 7
+    question: Please provide a summary of the major plot points and critical reception
+      for the newest Marvel movie.
+  - category: moderate_search
+    length: 18
+    query: GLP-1 receptor agonists in polycystic ovary syndrome (PCOS) latest clinical
+      trials
+    query_length: 11
+    question: I am looking for the most recent clinical study results regarding the
+      effectiveness of GLP-1 drugs for PCOS.
+  - category: moderate_search
+    length: 17
+    query: 2024 European heatwave temperature comparison to 2003
+    query_length: 7
+    question: How does the current 2024 heatwave in Europe compare to the record temperatures
+      seen back in 2003?
+  - category: edge_case
+    length: 3
+    query: 'Paris city government
+
+
+      (Note: The prompt is asking for the capital of France, which is commonly known
+      to be Paris. A web search would not provide more specific or up-to-date information
+      on this topic.)'
+    query_length: 34
+    question: Capital of France?
+  - category: edge_case
+    length: 6
+    query: number of planets in our solar system
+    query_length: 7
+    question: How many planets in solar system?
+  - category: edge_case
+    length: 5
+    query: circle area formula
+    query_length: 3
+    question: Formula for area of circle
+  - category: edge_case
+    length: 6
+    query: Harper Lee author To Kill a Mockingbird
+    query_length: 7
+    question: Who wrote 'To Kill a Mockingbird'?
+  - category: edge_case
+    length: 7
+    query: boiling point of water temperature
+    query_length: 5
+    question: What is the boiling point of water?
+  - category: edge_case
+    length: 16
+    query: united nations mission statement change history
+    query_length: 6
+    question: I need the official mission statement of the United Nations to see if
+      it has changed.
+  - category: edge_case
+    length: 16
+    query: african union member states
+    query_length: 4
+    question: Please confirm the current total number of member states in the African
+      Union for my report.
+  - category: edge_case
+    length: 17
+    query: Burj Khalifa current height with antenna
+    query_length: 6
+    question: Can you verify the exact height of the Burj Khalifa including any recent
+      antenna modifications or updates?
+  - category: edge_case
+    length: 17
+    query: Tokyo Japan population latest government census figures
+    query_length: 7
+    question: What is the current population of Tokyo, Japan, according to the most
+      recently published government census data?
+  - category: edge_case
+    length: 18
+    query: define generative ai oxford english dictionary
+    query_length: 6
+    question: I am looking for the current standard definition of 'Generative AI'
+      as used by the Oxford English Dictionary.
+- - category: clear_search
+    length: 8
+    query: ethereum current price usd
+    query_length: 4
+    question: What's the current price of Ethereum in USD?
+  - category: clear_search
+    length: 4
+    query: Tokyo weather forecast current conditions
+    query_length: 5
+    question: Weather today in Tokyo?
+  - category: clear_search
+    length: 6
+    query: MLB scores last night
+    query_length: 4
+    question: Who won the game last night?
+  - category: clear_search
+    length: 5
+    query: current nvda stock price
+    query_length: 4
+    question: NVDA stock price right now
+  - category: clear_search
+    length: 5
+    query: I-95 current road conditions
+    query_length: 4
+    question: Is the I-95 open currently?
+  - category: clear_search
+    length: 5
+    query: London breaking news today
+    query_length: 4
+    question: Latest breaking news in London
+  - category: clear_search
+    length: 13
+    query: florida 30 year fixed mortgage rates today
+    query_length: 7
+    question: What is the current mortgage rate for a 30-year fixed loan in Florida?
+  - category: clear_search
+    length: 14
+    query: pharmacy near me open tonight
+    query_length: 5
+    question: Find me the opening hours for the closest pharmacy that is still open
+      tonight.
+  - category: clear_search
+    length: 14
+    query: Gladiator 2 movie showtimes near my location
+    query_length: 7
+    question: What are the most recent movie showtimes for 'Gladiator II' at theaters
+      near me?
+  - category: clear_search
+    length: 15
+    query: Southern California current wildfire evacuations
+    query_length: 5
+    question: I need to know if there are any active wildfire evacuations in Southern
+      California today.
+  - category: clear_search
+    length: 15
+    query: UK 2023 budget policy changes
+    query_length: 5
+    question: Tell me about the specific policy changes announced in the most recent
+      UK budget statement.
+  - category: clear_search
+    length: 15
+    query: Top trending topics this week in USA Google Trends
+    query_length: 9
+    question: Please provide a list of the top 5 trending topics on X in the US.
+  - category: clear_search
+    length: 14
+    query: australia vs india test cricket current score
+    query_length: 7
+    question: What is the current score of the ongoing Test match between Australia
+      and India?
+  - category: clear_search
+    length: 16
+    query: salmon food recall fda recent
+    query_length: 5
+    question: Are there any food recalls issued by the FDA in the last 48 hours for
+      salmon?
+  - category: clear_search
+    length: 17
+    query: New York to Paris flight prices this Friday return Sunday
+    query_length: 10
+    question: Show me the cheapest round-trip flights from New York to Paris departing
+      this Friday and returning Sunday.
+  - category: clear_search
+    length: 16
+    query: James Webb Space Telescope latest galaxy discovery 2024
+    query_length: 8
+    question: I'm looking for the most recent updates on the James Webb Space Telescope's
+      latest galaxy discovery.
+  - category: clear_search
+    length: 17
+    query: Starbucks current CEO appointment date
+    query_length: 5
+    question: Can you find the current CEO of Starbucks and when they were officially
+      appointed to the role?
+  - category: clear_search
+    length: 16
+    query: costco san diego gas prices vs california state average
+    query_length: 9
+    question: What are the current gas prices at Costco in San Diego compared to the
+      state average?
+  - category: clear_search
+    length: 14
+    query: Fed interest rate decision today
+    query_length: 5
+    question: What did the Federal Reserve decide regarding interest rates during
+      their meeting this afternoon?
+  - category: clear_search
+    length: 17
+    query: solar flare forecast northern minnesota
+    query_length: 5
+    question: Any idea if the Northern Lights will be visible from northern Minnesota
+      tonight based on solar activity?
+  - category: clear_search
+    length: 17
+    query: new iPhone release 2023 critical reviews
+    query_length: 6
+    question: Looking for a summary of the critical reviews for the new iPhone model
+      released earlier this week.
+  - category: clear_search
+    length: 16
+    query: Massachusetts General Hospital emergency room wait time today
+    query_length: 8
+    question: What is the current wait time for the emergency room at Massachusetts
+      General Hospital right now?
+  - category: clear_search
+    length: 16
+    query: "2024 Nobel Prize in Physics winners and research\n\nor \n\nNobel Prize\
+      \ in Physics 2024 laureates and achievements\n\nor \n\nResearch contributions\
+      \ 2024 Nobel Prize in Physics winners"
+    query_length: 26
+    question: Please list the winners of the 2024 Nobel Prize in Physics and their
+      specific research contributions.
+  - category: clear_search
+    length: 18
+    query: japanese yen to euro exchange rate today
+    query_length: 7
+    question: I require information on the current exchange rate between the Japanese
+      Yen and the Euro as of today.
+  - category: clear_search
+    length: 18
+    query: Taylor Swift European tour dates 2023 ticket availability
+    query_length: 8
+    question: What are the upcoming tour dates for Taylor Swift in Europe and are
+      tickets still available for purchase?
+  - category: moderate_search
+    length: 6
+    query: best laptops for video editing 2024 reviews
+    query_length: 7
+    question: Best laptop for video editing 2024?
+  - category: moderate_search
+    length: 7
+    query: AI job market growth trends 2023
+    query_length: 6
+    question: How is the job market for AI?
+  - category: moderate_search
+    length: 5
+    query: space missions 2023
+    query_length: 3
+    question: Upcoming space missions this year
+  - category: moderate_search
+    length: 7
+    query: 2023 tax law changes
+    query_length: 4
+    question: What's up with the new tax laws?
+  - category: moderate_search
+    length: 7
+    query: coffee and cancer prevention studies
+    query_length: 5
+    question: Is it true that coffee prevents cancer?
+  - category: moderate_search
+    length: 6
+    query: sushi restaurants in Seattle
+    query_length: 4
+    question: Top rated sushi restaurants in Seattle?
+  - category: moderate_search
+    length: 16
+    query: solid state battery ev breakthroughs 2023
+    query_length: 6
+    question: Tell me about the latest breakthroughs in solid-state battery technology
+      for electric vehicles from this year.
+  - category: moderate_search
+    length: 17
+    query: samsung galaxy s series camera specs vs google pixel latest model
+    query_length: 11
+    question: Compare the camera specs of the latest Samsung Galaxy S series versus
+      the newest Google Pixel phone.
+  - category: moderate_search
+    length: 16
+    query: best performing small cap etfs past 6 months
+    query_length: 8
+    question: What are the best-performing small-cap ETFs over the last six months
+      according to recent financial analysis?
+  - category: moderate_search
+    length: 16
+    query: fonio superfood recipes high protein vegetarian meal plans
+    query_length: 8
+    question: I need to find a high-protein vegetarian meal plan that incorporates
+      recently trending superfoods like fonio.
+  - category: moderate_search
+    length: 17
+    query: best wireless earbuds for running 2023
+    query_length: 6
+    question: Find me the most highly recommended wireless earbuds for running that
+      were released in the last year.
+  - category: moderate_search
+    length: 17
+    query: 'US citizen visa requirements Vietnam 2023 travel restrictions
+
+
+      (Note: I''ve used 2023 to ensure that the search results include the most up-to-date
+      information, as regulations and requirements can change frequently.)'
+    query_length: 30
+    question: What are the current travel restrictions or visa requirements for US
+      citizens visiting Vietnam for a vacation?
+  - category: moderate_search
+    length: 17
+    query: newest Marvel movie plot summary and reviews
+    query_length: 7
+    question: Please provide a summary of the major plot points and critical reception
+      for the newest Marvel movie.
+  - category: moderate_search
+    length: 18
+    query: GLP-1 drugs PCOS latest clinical trials
+    query_length: 6
+    question: I am looking for the most recent clinical study results regarding the
+      effectiveness of GLP-1 drugs for PCOS.
+  - category: moderate_search
+    length: 17
+    query: Europe 2024 heatwave vs 2003
+    query_length: 5
+    question: How does the current 2024 heatwave in Europe compare to the record temperatures
+      seen back in 2003?
+  - category: edge_case
+    length: 3
+    query: Paris capital France
+    query_length: 3
+    question: Capital of France?
+  - category: edge_case
+    length: 6
+    query: number of planets in our solar system
+    query_length: 7
+    question: How many planets in solar system?
+  - category: edge_case
+    length: 5
+    query: Circle area formula
+    query_length: 3
+    question: Formula for area of circle
+  - category: edge_case
+    length: 6
+    query: Harper Lee author To Kill a Mockingbird
+    query_length: 7
+    question: Who wrote 'To Kill a Mockingbird'?
+  - category: edge_case
+    length: 7
+    query: water boiling point
+    query_length: 3
+    question: What is the boiling point of water?
+  - category: edge_case
+    length: 16
+    query: United Nations official mission statement history
+    query_length: 6
+    question: I need the official mission statement of the United Nations to see if
+      it has changed.
+  - category: edge_case
+    length: 16
+    query: african union member states
+    query_length: 4
+    question: Please confirm the current total number of member states in the African
+      Union for my report.
+  - category: edge_case
+    length: 17
+    query: Burj Khalifa current height with antennas
+    query_length: 6
+    question: Can you verify the exact height of the Burj Khalifa including any recent
+      antenna modifications or updates?
+  - category: edge_case
+    length: 17
+    query: Tokyo population latest government census
+    query_length: 5
+    question: What is the current population of Tokyo, Japan, according to the most
+      recently published government census data?
+  - category: edge_case
+    length: 18
+    query: Oxford English Dictionary definition Generative AI
+    query_length: 6
+    question: I am looking for the current standard definition of 'Generative AI'
+      as used by the Oxford English Dictionary.
+test_cases:
+- !!python/tuple
+  - What's the current price of Ethereum in USD?
+  - clear_search
+- !!python/tuple
+  - Weather today in Tokyo?
+  - clear_search
+- !!python/tuple
+  - Who won the game last night?
+  - clear_search
+- !!python/tuple
+  - NVDA stock price right now
+  - clear_search
+- !!python/tuple
+  - Is the I-95 open currently?
+  - clear_search
+- !!python/tuple
+  - Latest breaking news in London
+  - clear_search
+- !!python/tuple
+  - What is the current mortgage rate for a 30-year fixed loan in Florida?
+  - clear_search
+- !!python/tuple
+  - Find me the opening hours for the closest pharmacy that is still open tonight.
+  - clear_search
+- !!python/tuple
+  - What are the most recent movie showtimes for 'Gladiator II' at theaters near me?
+  - clear_search
+- !!python/tuple
+  - I need to know if there are any active wildfire evacuations in Southern California
+    today.
+  - clear_search
+- !!python/tuple
+  - Tell me about the specific policy changes announced in the most recent UK budget
+    statement.
+  - clear_search
+- !!python/tuple
+  - Please provide a list of the top 5 trending topics on X in the US.
+  - clear_search
+- !!python/tuple
+  - What is the current score of the ongoing Test match between Australia and India?
+  - clear_search
+- !!python/tuple
+  - Are there any food recalls issued by the FDA in the last 48 hours for salmon?
+  - clear_search
+- !!python/tuple
+  - Show me the cheapest round-trip flights from New York to Paris departing this
+    Friday and returning Sunday.
+  - clear_search
+- !!python/tuple
+  - I'm looking for the most recent updates on the James Webb Space Telescope's latest
+    galaxy discovery.
+  - clear_search
+- !!python/tuple
+  - Can you find the current CEO of Starbucks and when they were officially appointed
+    to the role?
+  - clear_search
+- !!python/tuple
+  - What are the current gas prices at Costco in San Diego compared to the state average?
+  - clear_search
+- !!python/tuple
+  - What did the Federal Reserve decide regarding interest rates during their meeting
+    this afternoon?
+  - clear_search
+- !!python/tuple
+  - Any idea if the Northern Lights will be visible from northern Minnesota tonight
+    based on solar activity?
+  - clear_search
+- !!python/tuple
+  - Looking for a summary of the critical reviews for the new iPhone model released
+    earlier this week.
+  - clear_search
+- !!python/tuple
+  - What is the current wait time for the emergency room at Massachusetts General
+    Hospital right now?
+  - clear_search
+- !!python/tuple
+  - Please list the winners of the 2024 Nobel Prize in Physics and their specific
+    research contributions.
+  - clear_search
+- !!python/tuple
+  - I require information on the current exchange rate between the Japanese Yen and
+    the Euro as of today.
+  - clear_search
+- !!python/tuple
+  - What are the upcoming tour dates for Taylor Swift in Europe and are tickets still
+    available for purchase?
+  - clear_search
+- !!python/tuple
+  - Best laptop for video editing 2024?
+  - moderate_search
+- !!python/tuple
+  - How is the job market for AI?
+  - moderate_search
+- !!python/tuple
+  - Upcoming space missions this year
+  - moderate_search
+- !!python/tuple
+  - What's up with the new tax laws?
+  - moderate_search
+- !!python/tuple
+  - Is it true that coffee prevents cancer?
+  - moderate_search
+- !!python/tuple
+  - Top rated sushi restaurants in Seattle?
+  - moderate_search
+- !!python/tuple
+  - Tell me about the latest breakthroughs in solid-state battery technology for electric
+    vehicles from this year.
+  - moderate_search
+- !!python/tuple
+  - Compare the camera specs of the latest Samsung Galaxy S series versus the newest
+    Google Pixel phone.
+  - moderate_search
+- !!python/tuple
+  - What are the best-performing small-cap ETFs over the last six months according
+    to recent financial analysis?
+  - moderate_search
+- !!python/tuple
+  - I need to find a high-protein vegetarian meal plan that incorporates recently
+    trending superfoods like fonio.
+  - moderate_search
+- !!python/tuple
+  - Find me the most highly recommended wireless earbuds for running that were released
+    in the last year.
+  - moderate_search
+- !!python/tuple
+  - What are the current travel restrictions or visa requirements for US citizens
+    visiting Vietnam for a vacation?
+  - moderate_search
+- !!python/tuple
+  - Please provide a summary of the major plot points and critical reception for the
+    newest Marvel movie.
+  - moderate_search
+- !!python/tuple
+  - I am looking for the most recent clinical study results regarding the effectiveness
+    of GLP-1 drugs for PCOS.
+  - moderate_search
+- !!python/tuple
+  - How does the current 2024 heatwave in Europe compare to the record temperatures
+    seen back in 2003?
+  - moderate_search
+- !!python/tuple
+  - Capital of France?
+  - edge_case
+- !!python/tuple
+  - How many planets in solar system?
+  - edge_case
+- !!python/tuple
+  - Formula for area of circle
+  - edge_case
+- !!python/tuple
+  - Who wrote 'To Kill a Mockingbird'?
+  - edge_case
+- !!python/tuple
+  - What is the boiling point of water?
+  - edge_case
+- !!python/tuple
+  - I need the official mission statement of the United Nations to see if it has changed.
+  - edge_case
+- !!python/tuple
+  - Please confirm the current total number of member states in the African Union
+    for my report.
+  - edge_case
+- !!python/tuple
+  - Can you verify the exact height of the Burj Khalifa including any recent antenna
+    modifications or updates?
+  - edge_case
+- !!python/tuple
+  - What is the current population of Tokyo, Japan, according to the most recently
+    published government census data?
+  - edge_case
+- !!python/tuple
+  - I am looking for the current standard definition of 'Generative AI' as used by
+    the Oxford English Dictionary.
+  - edge_case

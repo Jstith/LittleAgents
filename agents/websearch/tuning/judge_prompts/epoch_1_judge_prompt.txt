@@ -1,0 +1,220 @@
+You are evaluating search query quality for a web search agent. You will receive pairs of:
+1. Original user question
+2. Generated search query
+
+Rate each generated query on a scale of 1-5 based on these criteria:
+
+**Scoring Rubric:**
+
+5 - Excellent
+- Captures core intent perfectly
+- Removes conversational fluff ("please", "I need", "can you")
+- Optimal length for search engines (2-8 words typically)
+- Includes key terms that will return relevant results
+- Uses search operators appropriately (quotes, OR, site:) when helpful
+
+4 - Good
+- Captures main intent well
+- Minor unnecessary words remain
+- Slightly too long or too short, but workable
+- Would return good results with minor noise
+
+3 - Adequate
+- Gets the general idea
+- Contains some fluff or awkward phrasing
+- Missing some key terms OR includes too many irrelevant terms
+- Would return mixed results
+
+2 - Poor
+- Misses important aspects of the question
+- Too verbose or too vague
+- Would return many irrelevant results
+- Key search terms missing
+
+1 - Very Poor
+- Fundamentally misunderstands the question
+- Would return wrong results entirely
+- Unusable as a search query
+
+**Output Format:**
+
+For each question/query pair, respond with ONLY:
+```
+Q[number]: [score]/5
+```
+
+Example:
+```
+Q1: 5/5
+Q2: 3/5
+Q3: 4/5
+```
+
+**Important:**
+- Be strict but fair
+- Focus on search effectiveness, not grammar
+- Shorter is often better for search queries
+- Consider if the query would actually return useful results
+- do NOT provide explanations, ONLY scores
+
+---
+
+**Input Data:**
+
+# Epoch 1 - Search Query Evaluation
+
+Q1: What's the current price of Ethereum in USD?
+Generated: Ethereum price USD today
+
+Q2: Weather today in Tokyo?
+Generated: Tokyo weather forecast now
+
+Q3: Who won the game last night?
+Generated: Sports scores from last night's games
+
+Q4: NVDA stock price right now
+Generated: nvda stock current price
+
+Q5: Is the I-95 open currently?
+Generated: i-95 current road conditions
+
+Q6: Latest breaking news in London
+Generated: London news today
+
+Q7: What is the current mortgage rate for a 30-year fixed loan in Florida?
+Generated: Florida 30 year fixed mortgage rates today
+
+Q8: Find me the opening hours for the closest pharmacy that is still open tonight.
+Generated: pharmacy near me current business hours tonight
+
+Q9: What are the most recent movie showtimes for 'Gladiator II' at theaters near me?
+Generated: showtimes Gladiator II near my location
+
+Q10: I need to know if there are any active wildfire evacuations in Southern California today.
+Generated: southern california active wildfire evacuations
+
+Q11: Tell me about the specific policy changes announced in the most recent UK budget statement.
+Generated: uk latest budget 2023 policy changes
+
+Q12: Please provide a list of the top 5 trending topics on X in the US.
+Generated: Trending topics X in the US
+
+Q13: What is the current score of the ongoing Test match between Australia and India?
+Generated: australia vs india test cricket current score
+
+Q14: Are there any food recalls issued by the FDA in the last 48 hours for salmon?
+Generated: FDA salmon recall recent 48 hours
+
+Q15: Show me the cheapest round-trip flights from New York to Paris departing this Friday and returning Sunday.
+Generated: New York to Paris flights this Friday return Sunday cheapest
+
+Q16: I'm looking for the most recent updates on the James Webb Space Telescope's latest galaxy discovery.
+Generated: james webb space telescope latest galaxy discovery news
+
+Q17: Can you find the current CEO of Starbucks and when they were officially appointed to the role?
+Generated: Starbucks CEO appointment date
+
+Q18: What are the current gas prices at Costco in San Diego compared to the state average?
+Generated: San Diego Costco gas prices vs California state average
+
+Q19: What did the Federal Reserve decide regarding interest rates during their meeting this afternoon?
+Generated: Federal Reserve interest rate decision today
+
+Q20: Any idea if the Northern Lights will be visible from northern Minnesota tonight based on solar activity?
+Generated: Northern Lights forecast northern Minnesota solar activity tonight
+
+Q21: Looking for a summary of the critical reviews for the new iPhone model released earlier this week.
+Generated: new iPhone model release 2024 critical reviews
+
+Q22: What is the current wait time for the emergency room at Massachusetts General Hospital right now?
+Generated: Massachusetts General Hospital emergency room wait time now
+
+Q23: Please list the winners of the 2024 Nobel Prize in Physics and their specific research contributions.
+Generated: 2024 Nobel Prize in Physics winners and their research
+
+Q24: I require information on the current exchange rate between the Japanese Yen and the Euro as of today.
+Generated: Current JPY EUR exchange rate
+
+Q25: What are the upcoming tour dates for Taylor Swift in Europe and are tickets still available for purchase?
+Generated: taylor swift europe tour dates 2023 ticket availability
+
+Q26: Best laptop for video editing 2024?
+Generated: best laptops for video editing 2024 review
+
+Q27: How is the job market for AI?
+Generated: AI job market growth statistics 2023
+
+Q28: Upcoming space missions this year
+Generated: upcoming space missions 2023
+
+Q29: What's up with the new tax laws?
+Generated: new tax law updates 2023
+
+Q30: Is it true that coffee prevents cancer?
+Generated: coffee cancer prevention studies
+
+Q31: Top rated sushi restaurants in Seattle?
+Generated: sushi restaurants seattle reviews
+
+Q32: Tell me about the latest breakthroughs in solid-state battery technology for electric vehicles from this year.
+Generated: solid state battery electric vehicle breakthroughs 2023
+
+Q33: Compare the camera specs of the latest Samsung Galaxy S series versus the newest Google Pixel phone.
+Generated: samsung galaxy s series camera specs vs google pixel 6 camera specs
+
+Q34: What are the best-performing small-cap ETFs over the last six months according to recent financial analysis?
+Generated: small-cap ETF performance last 6 months
+
+Q35: I need to find a high-protein vegetarian meal plan that incorporates recently trending superfoods like fonio.
+Generated: Fonio recipes high protein vegetarian
+
+Q36: Find me the most highly recommended wireless earbuds for running that were released in the last year.
+Generated: best wireless earbuds for running 2023
+
+(Note: I've assumed 2023 as the current year, but if you want a more general query, you can simply use best wireless earbuds for running)
+
+Q37: What are the current travel restrictions or visa requirements for US citizens visiting Vietnam for a vacation?
+Generated: US citizen travel restrictions Vietnam visa requirements 2023
+
+Q38: Please provide a summary of the major plot points and critical reception for the newest Marvel movie.
+Generated: Newest Marvel movie plot summary and reviews
+
+Q39: I am looking for the most recent clinical study results regarding the effectiveness of GLP-1 drugs for PCOS.
+Generated: GLP-1 receptor agonists PCOS efficacy studies 2023
+
+Q40: How does the current 2024 heatwave in Europe compare to the record temperatures seen back in 2003?
+Generated: European heatwaves comparison 2024 vs 2003 temperature records
+
+Q41: Capital of France?
+Generated: Paris capital France
+
+Q42: How many planets in solar system?
+Generated: number of planets in our solar system
+
+Q43: Formula for area of circle
+Generated: Area formula circle
+
+Q44: Who wrote 'To Kill a Mockingbird'?
+Generated: Harper Lee author To Kill a Mockingbird
+
+Q45: What is the boiling point of water?
+Generated: water boiling point temperature
+
+Q46: I need the official mission statement of the United Nations to see if it has changed.
+Generated: United Nations official mission statement change over time
+
+Q47: Please confirm the current total number of member states in the African Union for my report.
+Generated: african union member states 2024
+
+Q48: Can you verify the exact height of the Burj Khalifa including any recent antenna modifications or updates?
+Generated: burj khalifa current height
+
+Q49: What is the current population of Tokyo, Japan, according to the most recently published government census data?
+Generated: Tokyo Japan population latest census
+
+Q50: I am looking for the current standard definition of 'Generative AI' as used by the Oxford English Dictionary.
+Generated: Oxford English Dictionary definition generative AI
+
+---
+
+BEGIN EVALUATION:
