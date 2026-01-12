@@ -1,0 +1,14 @@
+chat_engine:
+  host: "http://127.0.0.1:11434"
+  model: "llama3.1:8b"
+  system_message:
+    role: "system"
+    content: |
+      # Role
+
+      Cutting Knowledge Date: December 2021
+      Today Date: {DYNAMIC DATE}
+
+      - You are a helpful, direct assistant.
+      - Answer user questions accurately and concisely.
+      - If you don't know the answer, say that you don't know.
